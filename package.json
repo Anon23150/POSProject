@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
+    "firebase": "^10.6.0",
+    "react-native-elements": "^3.4.3",
+    "react-native-screens": "^3.27.0"
+  }
+}

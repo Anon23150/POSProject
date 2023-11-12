@@ -3,7 +3,8 @@ import { View , Text } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import  Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { initDB, insertProduct, closeDB } from '../database/database';
+import  { useEffect } from 'react';
 
 
 
@@ -13,6 +14,7 @@ import WithdrawScreen from './Screen/WithdrawScreen';
 import ReportScreen from './Screen/ReportScreen';
 import ScanQRScreen from './Screen/ScanQRScreen';
 import StockScreen from './Screen/StockScreen';
+
 
 //Set name Screen 
 const homeName = "Home";
@@ -24,42 +26,57 @@ const scanQRName = "ScanQR"
 
 
 
+
 //Tab navigater 
 const Tab = createBottomTabNavigator();
 
 export default function MainContainer() {
+    useEffect(() => {
+        const setupDatabase = async () => {
+          try {
+            await initDB();
+            await insertProduct('Product 1', 'pm123', 'pt456', 'pc789', '../../PosAndStock/Image/123.jpg', 19.99, 100);
+            await insertProduct('Product 2', 'pm123', 'pt456', 'pc789', '../../PosAndStock/Image/123.jpg', 20.99, 50);
+            console.log('Products inserted successfully');
+          } catch (error) {
+            console.error('Database setup failed', error);
+          }
+        };
+    
+        setupDatabase();
+      }, []);
+    
+    
+    
     return(
         <NavigationContainer>
             <Tab.Navigator
                 initialRouteName={homeName}
-                screenOptions={({route}) => ({
-                    tabBarIcon: ({focused, color, size}) => {
-                        let iconName;
-                        let rn = route.name;
+                screenOptions={({ route }) => ({
+                    tabBarIcon: ({ focused, color, size }) => {
+                    let iconName;
+                    let rn = route.name;
 
-                        // ตัวอย่างการใช้ Icon จาก React Native ตรงนี้
-                        if (rn === homeName) {
-                            iconName = focused ? "home" : "home-outline"
-                        } else if (rn === withdrawName) {
-                            iconName = focused ? 'list' : 'list-outline'
-                        } else if (rn === reportName) {
-                            iconName = focused ? 'document' : 'document-outline'
-                        } else if (rn === stockName) {
-                            iconName = focused ? 'storefront-outline' : 'storefront-outline'
-                        } else if (rn === scanQRName) {
-                            iconName = focused ? 'scan' : 'scan-outline'
-                        }
-                        
-
-
-                        return <Ionicons name={iconName} size={size} color={color} />;
+                    if (rn === homeName) {
+                        iconName = focused ? "home" : "home-outline";
+                    } else if (rn === withdrawName) {
+                        iconName = focused ? 'list' : 'list-outline';
+                    } else if (rn === reportName) {
+                        iconName = focused ? 'document' : 'document-outline';
+                    } else if (rn === stockName) {
+                        iconName = focused ? 'storefront-outline' : 'storefront-outline';
+                    } else if (rn === scanQRName) {
+                        iconName = focused ? 'scan' : 'scan-outline';
                     }
-                    
-                    
-                    
+
+                    return <Ionicons name={iconName} size={size} color={color} />;
+                    },
+                    tabBarActiveTintColor: 'tomato',    // สีของไอคอนเมื่อเลือก
+                    tabBarInactiveTintColor: 'gray',    // สีของไอคอนเมื่อไม่ได้เลือก
+                    tabBarShowLabel: true,              // แสดงชื่อแท็บหรือไม่
+                    tabBarStyle: [{ display: 'flex' }]  // สไตล์ของแท็บบาร์
                 })}
-                tabBarOptions={null}
-                >    
+                >
             
                 <Tab.Screen name={homeName} component={HomeScreen} />
                 <Tab.Screen name={withdrawName} component={WithdrawScreen} />

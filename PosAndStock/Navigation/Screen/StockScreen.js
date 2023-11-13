@@ -2,16 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { insertProduct } from '../../database/database'; // ตรวจสอบว่าฟังก์ชันนี้ถูกสร้างและนำเข้ามาอย่างถูกต้อง
 
+// import { RNCamera } from 'react-native-camera';
+
 export default function StockScreen({ navigation }) {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [pdType, setpdType] = useState('');
   const [pmID, setpmID] = useState('');
+  const [barCode, setBarCode] = useState('');
 
 
 
 
+  // const handleBarCodeRead = e => {
+  //   // จัดการกับข้อมูลบาร์โค้ดที่สแกนได้
+  //   setBarCode(e.data);
+  // };
 
 
 
@@ -31,7 +38,7 @@ export default function StockScreen({ navigation }) {
       //await insertProduct(name, productPrice, productQuantity);
       //await insertProduct('Name', 'Promotion', 'ProductType', 'bill', 'paht', price, quantity);
       //await insertProduct(name, pmID, pdType, '', '', productPrice, productQuantity);
-      await insertProduct(name, pmID, pdType, '','', productPrice, productQuantity);
+      await insertProduct(name, pmID, pdType, '','', productPrice, productQuantity,barCode);
    
       alert('Product inserted successfully');
       // ทำการ clear fields หลังจากการ insert
@@ -40,6 +47,7 @@ export default function StockScreen({ navigation }) {
       setQuantity('');
       setpdType('');
       setpmID('');
+      setBarCode('')
     } catch (error) {
       console.error('Failed to insert the product', error);
     }
@@ -74,16 +82,31 @@ export default function StockScreen({ navigation }) {
         style={styles.input}
         placeholder="Product type"
         value={pdType}
-        onChangeText={setpdType} // ใช้ setpdType ที่นี่เพื่ออัปเดต pdType
+        onChangeText={setpdType} 
       />
 
       <TextInput
         style={styles.input}
         placeholder="Promotion"
         value={pmID}
-        keyboardType="default" // ถ้าเป็น string คุณอาจไม่ต้องการใช้ "numeric"
-        onChangeText={setpmID} // ใช้ setpmID ที่นี่เพื่ออัปเดต pmID
+        keyboardType="default" 
+        onChangeText={setpmID} 
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Barcode"
+        value={barCode}
+        keyboardType="default"
+        onChangeText={setBarCode} 
+      />
+      {/* <Button title="Scan Barcode" onPress={() => setScanning(true)} />
+      {scanning && (
+        <RNCamera
+          style={styles.preview}
+          onBarCodeRead={handleBarCodeRead}
+          // ... คุณสมบัติอื่นๆ ที่คุณอาจต้องการตั้งค่า ...
+        />
+      )} */}
       <Button title="Insert Product" onPress={handleInsert} />
     </View>
   );

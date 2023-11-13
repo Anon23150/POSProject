@@ -21,7 +21,7 @@ export function initDB() {
       db.transaction((tx) => {
         tx.executeSql(
           "CREATE TABLE IF NOT EXISTS Products " +
-          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, pmID TEXT, ptID TEXT, pcID TEXT, PicturePath TEXT, Price REAL, Quantity INTEGER);",
+          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, pmID TEXT, ptID TEXT, pcID TEXT, PicturePath TEXT, Price REAL, Quantity INTEGER , BarCode TEXT);",
           [],
           () => {
             console.log("Table created successfully");
@@ -38,15 +38,15 @@ export function initDB() {
   );
 }
 
-export const insertProduct = async (name, pmID, ptID, pcID, picturePath, price, quantity) => {
+export const insertProduct = async (name, pmID, ptID, pcID, picturePath, price, quantity, BarCode) => {
   // ตรวจสอบว่าฐานข้อมูลเปิดอยู่
   await initDB();
 
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?);",
-        [name, pmID, ptID, pcID, picturePath, price, quantity],
+        "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+        [name, pmID, ptID, pcID, picturePath, price, quantity,BarCode],
         (_, results) => {
           console.log("Product inserted successfully", results);
           resolve(results);

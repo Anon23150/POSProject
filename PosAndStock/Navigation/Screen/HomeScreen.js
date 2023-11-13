@@ -1,14 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity ,FlatList} from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity ,FlatList , Alert} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import { getProducts } from '../../database/database';
+import { getProducts , deleteProduct } from '../../database/database';
+
+
+
+const ProductItem = ({ item, onDelete }) => {
+  const confirmDelete = () => {
+    Alert.alert(
+      "Delete Product",
+      "Are you sure you want to delete this product?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", onPress: () => onDelete(item.ID) }
+      ]
+    );
+  };
+
+  return (
+    <TouchableOpacity onPress={confirmDelete} style={styles.settingsIcon}>
+      <Ionicons name="trash" size={24} color="black" />
+    </TouchableOpacity>
+  );
+};
+
 
 export default function HomeScreen({ navigation }) {
   
   const [products, setProducts] = useState([]); // เริ่มต้น state ด้วย array ว่าง
 
   useEffect(() => {
+    
     const loadProducts = async () => {
       try {
         const productsFromDB = await getProducts(); // ดึงข้อมูลจากฐานข้อมูล
@@ -19,13 +42,14 @@ export default function HomeScreen({ navigation }) {
     };
 
     loadProducts();
+    
   }, []);
   const renderProduct = ({ item, navigation }) => (
     <View style={styles.productContainer}>
-      <Image
+      {/* <Image
         source={{ uri: item.PicturePath }}
         style={styles.productImage}
-      />
+      /> */}
       <View style={styles.productTextContainer}>
         <Text style={styles.productText}>{item.Name}</Text>
         <Text style={styles.productText}>ราคา : {item.Price}</Text>

@@ -38,7 +38,8 @@ export function initDB() {
   );
 }
 
-export const insertProduct = (name, pmID, ptID, pcID, picturePath, price, quantity) => {
+export const insertProduct = async (name, pmID, ptID, pcID, picturePath, price, quantity) => {
+    await initDB(); // รอจนกว่าฐานข้อมูลจะเปิด
     return new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
@@ -71,7 +72,9 @@ export function closeDB() {
     );
   }
 }
-export const getProducts = () => {
+export const getProducts = async () => {
+
+    await initDB(); 
     return new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
@@ -89,6 +92,26 @@ export const getProducts = () => {
           (error) => {
             console.log(error);
             reject(error); // ส่งคืนข้อผิดพลาดหากมี
+          }
+        );
+      });
+    });
+  };
+
+
+  export const deleteProduct = async (id) => {
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          "DELETE FROM Products WHERE ID = ?;",
+          [id],
+          (_, results) => {
+            console.log("Product deleted successfully", results);
+            resolve(results);
+          },
+          (transactionError) => {
+            console.log("Error deleting product: " + transactionError.message);
+            reject(transactionError);
           }
         );
       });

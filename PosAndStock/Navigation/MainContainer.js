@@ -35,8 +35,8 @@ export default function MainContainer() {
         const setupDatabase = async () => {
           try {
             await initDB();
-            await insertProduct('Product 1', 'pm123', 'pt456', 'pc789', '../../PosAndStock/Image/123.jpg', 19.99, 100);
-            await insertProduct('Product 2', 'pm123', 'pt456', 'pc789', '../../PosAndStock/Image/123.jpg', 20.99, 50);
+            await insertProduct('Product 1', 'pm123', 'pt456', 'pc789', '../Image/123.jpg', 19.99, 100);
+            await insertProduct('Product 2', 'pm123', 'pt456', 'pc789', '../Image/123.jpg', 20.99, 50);
             console.log('Products inserted successfully');
           } catch (error) {
             console.error('Database setup failed', error);

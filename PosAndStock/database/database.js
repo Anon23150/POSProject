@@ -39,24 +39,27 @@ export function initDB() {
 }
 
 export const insertProduct = async (name, pmID, ptID, pcID, picturePath, price, quantity) => {
-    await initDB(); // รอจนกว่าฐานข้อมูลจะเปิด
-    return new Promise((resolve, reject) => {
-      db.transaction(tx => {
-        tx.executeSql(
-          "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?);",
-          [name, pmID, ptID, pcID, picturePath, price, quantity],
-          (_, results) => {
-            console.log("Product inserted successfully", results);
-            resolve(results);
-          },
-          (transactionError) => {
-            console.log("Error inserting product: " + transactionError.message);
-            reject(transactionError);
-          }
-        );
-      });
+  // ตรวจสอบว่าฐานข้อมูลเปิดอยู่
+  await initDB();
+
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity) VALUES (?, ?, ?, ?, ?, ?, ?);",
+        [name, pmID, ptID, pcID, picturePath, price, quantity],
+        (_, results) => {
+          console.log("Product inserted successfully", results);
+          resolve(results);
+        },
+        (transactionError) => {
+          console.log("Error inserting product: " + transactionError.message);
+          reject(transactionError);
+        }
+      );
     });
-  };
+  });
+};
+
 // Add more functions here to read, update, and delete products
 
 export function closeDB() {
@@ -111,6 +114,27 @@ export const getProducts = async () => {
           },
           (transactionError) => {
             console.log("Error deleting product: " + transactionError.message);
+            reject(transactionError);
+          }
+        );
+      });
+    });
+  };
+
+
+  export const deleteAllProducts = async () => {
+    await initDB(); // รอจนกว่าฐานข้อมูลจะเปิด
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          "DELETE FROM Products;",
+          [],
+          (_, results) => {
+            console.log("All products deleted successfully", results);
+            resolve(results);
+          },
+          (transactionError) => {
+            console.log("Error deleting all products: " + transactionError.message);
             reject(transactionError);
           }
         );

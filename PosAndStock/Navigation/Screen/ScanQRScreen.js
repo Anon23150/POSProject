@@ -1,41 +1,54 @@
-import * as React from 'react'
-import { View , Text , StyleSheet, TouchableOpacity} from 'react-native'
-import QRCodeScanner from 'react-native-qrcode-scanner';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
-export default function ScanQRScreen ({navigation}){
-    return(
-        <View style={styles.container}>
-            <QRCodeScanner
-              onRead={this.onSuccess}
-              flashMode={RNCamera.Constants.FlashMode.torch}
-              topContent={
-                <Text style={styles.centerText}>
-                  Go to{' '}
-                  <Text style={styles.textBold}>wikipedia.org/wiki/QR_code</Text> on
-                  your computer and scan the QR code.
-                </Text>
-              }
-              bottomContent={
-                <TouchableOpacity style={styles.buttonTouchable}>
-                  <Text style={styles.buttonText}>OK. Got it!</Text>
-                </TouchableOpacity>
-              }
-            />
-        </View>
-    );
+export default function ScanScreen() {
+  const [barcode, setBarcode] = useState('');
+
+  const handleBarCodeRead = e => {
+    setBarcode(e.data);
+    Alert.alert('Barcode Value', e.data, [{ text: 'OK', onPress: () => console.log('OK Pressed') }]);
+  };
+
+  return (
+    <View style={styles.container}>
+      <RNCamera
+        style={styles.preview}
+        onBarCodeRead={handleBarCodeRead}
+        flashMode={RNCamera.Constants.FlashMode.auto}
+      >
+        {barcode !== '' && (
+          <View style={styles.barcodeBox}>
+            <Text style={styles.barcodeText}>{barcode}</Text>
+          </View>
+        )}
+      </RNCamera>
+    </View>
+  );
 }
 
-
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    text: {
-      textAlign: 'center',
-      fontSize: 20,
-      // สไตล์อื่น ๆ ที่คุณต้องการเพิ่ม
-    },
-  });
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    backgroundColor: 'black',
+  },
+  preview: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  barcodeBox: {
+    position: 'absolute',
+    top: '50%',
+    left: '20%',
+    right: '20%',
+    padding: 16,
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  barcodeText: {
+    fontSize: 18,
+    color: 'black',
+  },
+});

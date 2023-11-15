@@ -1,104 +1,109 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity ,FlatList , Alert ,Button} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+  Button,
+} from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getProducts , deleteProduct ,deleteAllProducts} from '../../database/database';
+import {
+  getProducts,
+  deleteProduct,
+  deleteAllProducts,
+} from '../../database/database';
 
-
-
-
-
-
-
-
-export default function HomeScreen({ navigation }) {
-  
-  const [products, setProducts] = useState([]); // เริ่มต้น state ด้วย array ว่าง
+export default function HomeScreen({navigation}) {
+  const [products, setProducts] = useState([]); 
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      // โหลดข้อมูลผลิตภัณฑ์
+      
       loadProducts();
     });
-  
-    // โหลดข้อมูลเมื่อหน้านี้ถูกเปิดครั้งแรก
+
+    
     loadProducts();
-  
-    // ทำความสะอาด listener เมื่อหน้านี้ไม่ได้ใช้งานแล้ว
+
+   
     return unsubscribe;
   }, [navigation]);
-  
+
   const loadProducts = async () => {
     try {
-      const productsFromDB = await getProducts(); // ดึงข้อมูลจากฐานข้อมูล
-      setProducts(productsFromDB); // อัปเดต state
+      const productsFromDB = await getProducts(); 
+      setProducts(productsFromDB); 
     } catch (error) {
-      console.error("Failed to load products", error);
+      console.error('Failed to load products', error);
     }
   };
-  
 
   useEffect(() => {
-    
     const loadProducts = async () => {
       try {
-        const productsFromDB = await getProducts(); // ดึงข้อมูลจากฐานข้อมูล
-        setProducts(productsFromDB); // อัปเดต state
+        const productsFromDB = await getProducts(); 
+        setProducts(productsFromDB); 
       } catch (error) {
-        console.error("Failed to load products", error);
+        console.error('Failed to load products', error);
       }
     };
 
     loadProducts();
-  
-    
   }, []);
 
-  const handleDelete = (id) => {
+  const handleDelete = id => {
     Alert.alert(
-      "ลบข้อมูล",
-      "คุณแน่ใจหรือว่าต้องการลบข้อมูลนี้?",
+      'ลบข้อมูล',
+      'คุณแน่ใจหรือว่าต้องการลบข้อมูลนี้?',
       [
         {
-          text: "ยกเลิก",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
+          text: 'ยกเลิก',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
         },
         {
-          text: "ลบ", onPress: async () => {
+          text: 'ลบ',
+          onPress: async () => {
             try {
               await deleteProduct(id);
-              setProducts(products => products.filter(product => product.ID !== id));
+              setProducts(products =>
+                products.filter(product => product.ID !== id),
+              );
             } catch (error) {
-              console.error("Failed to delete the product", error);
+              console.error('Failed to delete the product', error);
             }
-          }
-        }
+          },
+        },
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 
-
-
-  
-  const renderProduct = ({ item, navigation }) => (
-    
-    
+  const renderProduct = ({item, navigation}) => (
     <View style={styles.productContainer}>
-      <Image
-        source={require('../../Image/123.jpg')}
-        style={styles.image}
-      />
-     
-      
+      <Image source={require('../../Image/water.jpg')} style={styles.image} />
+
       <View style={styles.productTextContainer}>
         <Text style={styles.productText}>{item.Name}</Text>
-        <Text style={styles.productText}>ราคา : {item.Price}</Text>
-        <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
+        <Text style={styles.productText}>ราคา ฿ {item.Price}</Text>
+        <Text style={styles.productText}>{item.BarCode}</Text>
+       
+        
       </View>
-      <TouchableOpacity onPress={() => handleDelete(item.ID)}>
-        <MaterialCommunityIcons name="trash-can-outline" size={24} color="black" />
+      <View>
+      <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
+      <TouchableOpacity onPress={() => handleDelete(item.ID) }>
+        <MaterialCommunityIcons
+          name="trash-can-outline"
+          size={24}
+          color="black"
+        />
       </TouchableOpacity>
+
+      </View>
     </View>
   );
   return (
@@ -106,39 +111,35 @@ export default function HomeScreen({ navigation }) {
       <FlatList
         data={products}
         renderItem={renderProduct}
-        keyExtractor={item => item.ID.toString()} // ID คือ primary key ของผลิตภัณฑ์ในฐานข้อมูล
+        keyExtractor={item => item.ID.toString()}
       />
 
-<Button
-  onPress={deleteAllProducts}
-  title="Learn More"
-/>
-
+      {/* <Button onPress={deleteAllProducts} title="Delete ALL" /> */}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   productContainer: {
-    flexDirection: 'row', // ทำให้ items ภายใน container นี้เรียงแนวนอน
+    flexDirection: 'row', 
     padding: 10,
-    alignItems: 'center', // จัดกลางแนวตั้ง
+    alignItems: 'center',
   },
   productTextContainer: {
-    flex: 1, // ให้ text container ยืดเต็มพื้นที่ที่เหลือ
-    marginLeft: 10, // ระยะห่างจากรูปภาพ
+    flex: 1, 
+    marginLeft: 10, 
   },
   productText: {
     color: 'black',
   },
   productImage: {
-    width: 50, // กำหนดขนาดของรูปภาพ
-    height: 50, // กำหนดขนาดของรูปภาพ
-    resizeMode: 'cover', // กำหนดวิธีการ resize ภาพ
+    width: 50, 
+    height: 50,
+    resizeMode: 'cover',
   },
   image: {
-    width: 50,  // กำหนดความกว้างของรูปภาพ
-    height: 50, // กำหนดความสูงของรูปภาพ
-    resizeMode: 'contain', // หรือ 'cover', 'stretch', 'center' ตามที่คุณต้องการ
+    width: 50, 
+    height: 50, 
+    resizeMode: 'contain', 
   },
 });

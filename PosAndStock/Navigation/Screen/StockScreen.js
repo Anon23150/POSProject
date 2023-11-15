@@ -1,55 +1,62 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { insertProduct } from '../../database/database'; // ตรวจสอบว่าฟังก์ชันนี้ถูกสร้างและนำเข้ามาอย่างถูกต้อง
+import { insertStock } from '../../database/StockDatabase'; // ตรวจสอบว่าฟังก์ชันนี้ถูกสร้างและนำเข้ามาอย่างถูกต้อง
+import { RNCamera } from 'react-native-camera';
 
 // import { RNCamera } from 'react-native-camera';
 
 export default function StockScreen({ navigation }) {
   const [name, setName] = useState('');
+  const [ptID, setPtID] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [pdType, setpdType] = useState('');
-  const [pmID, setpmID] = useState('');
   const [barCode, setBarCode] = useState('');
+  const [pack, setPack] = useState('');
 
 
 
 
-  // const handleBarCodeRead = e => {
-  //   // จัดการกับข้อมูลบาร์โค้ดที่สแกนได้
-  //   setBarCode(e.data);
-  // };
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleBarCodeRead = ({ type, data }) => {
+    setBarCode(data);
+    if(data){
+      setIsScanning(false); // ปิดกล้องหลังจากสแกนได้สำเร็จ
+
+    }
+    // หากต้องการทำอย่างอื่นกับข้อมูลบาร์โค้ดที่ได้ สามารถทำได้ที่นี่
+  };
 
 
 
   const handleInsert = async () => {
-    if (!name.trim() || !price || !quantity) {
-      alert('Please fill out all fields.');
+    if (!name.trim() || !price || !quantity || !ptID || !pack) {
+      alert('โปรดกรอกข้อมูลทุกช่อง');
       return;
     }
     try {
-      // แปลงราคาและจำนวนเป็นตัวเลขถ้าจำเป็น
+
       const productPrice = parseFloat(price);
       const productQuantity = parseInt(quantity, 10);
-      if (isNaN(productPrice) || isNaN(productQuantity)) {
-        alert('Price and Quantity need to be valid numbers.');
+      const productPack = parseInt(pack, 10);
+      if (isNaN(productPrice) || isNaN(productQuantity) || isNaN(productPack)) {
+        alert('Price, Quantity and Pack need to be valid numbers.');
         return;
       }
-      //await insertProduct(name, productPrice, productQuantity);
-      //await insertProduct('Name', 'Promotion', 'ProductType', 'bill', 'paht', price, quantity);
-      //await insertProduct(name, pmID, pdType, '', '', productPrice, productQuantity);
-      await insertProduct(name, pmID, pdType, '','', productPrice, productQuantity,barCode);
+  
+      "(Name TEXT, ptID TEXT, PicturePath TEXT, Price REAL, Quantity INTEGER, BarCode TEXT, Pack INTEGER);",
+      await insertStock(name,ptID,'',price,quantity,barCode,pack);
    
-      alert('Product inserted successfully');
-      // ทำการ clear fields หลังจากการ insert
+      alert('Stock inserted successfully');
+
       setName('');
+      setPtID('');
       setPrice('');
       setQuantity('');
-      setpdType('');
-      setpmID('');
-      setBarCode('')
+      setBarCode('');
+      setPack('');
     } catch (error) {
-      console.error('Failed to insert the product', error);
+      console.error('Failed to insert the stock', error);
     }
   };
 
@@ -80,34 +87,56 @@ export default function StockScreen({ navigation }) {
       />
       <TextInput
         style={styles.input}
-        placeholder="Product type"
-        value={pdType}
-        onChangeText={setpdType} 
+        placeholder="Unit per Pack"
+        value={pack}
+        keyboardType="numeric"
+        onChangeText={setPack}
       />
-
       <TextInput
         style={styles.input}
-        placeholder="Promotion"
-        value={pmID}
-        keyboardType="default" 
-        onChangeText={setpmID} 
+        placeholder="Product type"
+        value={ptID}
+        onChangeText={setPtID} 
       />
-      <TextInput
+     <TextInput
         style={styles.input}
         placeholder="Barcode"
         value={barCode}
         keyboardType="default"
         onChangeText={setBarCode} 
       />
-      {/* <Button title="Scan Barcode" onPress={() => setScanning(true)} />
-      {scanning && (
-        <RNCamera
-          style={styles.preview}
-          onBarCodeRead={handleBarCodeRead}
-          // ... คุณสมบัติอื่นๆ ที่คุณอาจต้องการตั้งค่า ...
-        />
-      )} */}
-      <Button title="Insert Product" onPress={handleInsert} />
+      {!isScanning && (
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Scan Barcode"
+            onPress={() => setIsScanning(true)}
+          />
+        </View>
+      )}
+
+      {isScanning && (
+        <View style={styles.cameraContainer}>
+          <RNCamera
+            style={styles.preview}
+            type={RNCamera.Constants.Type.back}
+            flashMode={RNCamera.Constants.FlashMode.off}
+            onBarCodeRead={handleBarCodeRead}
+            androidCameraPermissionOptions={{
+              title: 'Permission to use camera',
+              message: 'We need your permission to use your camera',
+              buttonPositive: 'Ok',
+              buttonNegative: 'Cancel',
+            }}
+          />
+          <View style={styles.buttonContainer}>
+            <Button title="Stop Scanning" onPress={() => setIsScanning(false)} />
+          </View>
+        </View>
+      )}
+
+      <View style={styles.buttonContainer}>
+        <Button title="Insert Product" onPress={handleInsert} />
+      </View>
     </View>
   );
 }
@@ -137,5 +166,16 @@ const styles = StyleSheet.create({
     height: 100,
     backgroundColor: '#eee',
   },
-  // เพิ่มสไตล์อื่น ๆ ตามที่คุณต้องการ
+
+  cameraContainer: {
+    width: '50%',
+    height: '50%',
+  },
+  preview: {
+    width: '100%',
+    height: '50%',
+  },
+  buttonContainer: {
+    marginVertical: 10, // เพิ่มระยะห่างแนวตั้ง
+  },
 });

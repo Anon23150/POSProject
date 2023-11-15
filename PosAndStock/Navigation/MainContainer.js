@@ -1,10 +1,12 @@
 import * as React from 'react'
-import { View , Text } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import  Ionicons from 'react-native-vector-icons/Ionicons';
-import { initDB, insertProduct, closeDB } from '../database/database';
+import { initProductDB } from '../database/database';
 import  { useEffect } from 'react';
+import { initStockDB ,insertStock} from '../database/StockDatabase';
+
+
 
 
 
@@ -34,8 +36,8 @@ export default function MainContainer() {
     useEffect(() => {
         const setupDatabase = async () => {
           try {
-            await initDB();
-            
+            await initProductDB();
+            await initStockDB();
           } catch (error) {
             console.error('Database setup failed', error);
           }

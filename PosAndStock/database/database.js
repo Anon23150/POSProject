@@ -10,7 +10,7 @@ const database_size = 200000;
 
 let db;
 
-export function initDB() {
+export function initProductDB() {
   db = SQLite.openDatabase(
     database_name,
     database_version,
@@ -40,7 +40,7 @@ export function initDB() {
 
 export const insertProduct = async (name, pmID, ptID, pcID, picturePath, price, quantity, BarCode) => {
   // ตรวจสอบว่าฐานข้อมูลเปิดอยู่
-  await initDB();
+  await initProductDB();
 
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
@@ -77,7 +77,7 @@ export function closeDB() {
 }
 export const getProducts = async () => {
 
-    await initDB(); 
+    await initProductDB(); 
     return new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
@@ -123,7 +123,7 @@ export const getProducts = async () => {
 
 
   export const deleteAllProducts = async () => {
-    await initDB(); // รอจนกว่าฐานข้อมูลจะเปิด
+    await initProductDB(); // รอจนกว่าฐานข้อมูลจะเปิด
     return new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
@@ -136,6 +136,52 @@ export const getProducts = async () => {
           (transactionError) => {
             console.log("Error deleting all products: " + transactionError.message);
             reject(transactionError);
+          }
+        );
+      });
+    });
+  };
+
+
+  export const getProductsByBarCode = async (barCode) => {
+    await initProductDB(); // ตรวจสอบว่า DB เปิดอยู่
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          "SELECT * FROM Products WHERE BarCode = ?;",
+          [barCode],
+          (tx, results) => {
+            let products = [];
+            for (let i = 0; i < results.rows.length; i++) {
+              let row = results.rows.item(i);
+              products.push(row);
+            }
+            resolve(products); // ส่งคืน array ของผลิตภัณฑ์
+          },
+          (error) => {
+            console.log("Error retrieving product by barcode: " + error.message);
+            reject(error); // ส่งคืน error หากมี
+          }
+        );
+      });
+    });
+  };
+  
+  // ฟังก์ชันเพื่ออัปเดตจำนวนผลิตภัณฑ์ในตาราง Products ด้วย BarCode
+  export const updateProductQuantityByBarCode = async (barCode, quantity) => {
+    await initProductDB(); // ตรวจสอบว่า DB เปิดอยู่
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          "UPDATE Products SET Quantity = ? WHERE BarCode = ?;",
+          [quantity, barCode],
+          (_, results) => {
+            console.log("Product quantity updated successfully", results);
+            resolve(results); // ส่งคืนผลลัพธ์หลังจากอัปเดต
+          },
+          (transactionError) => {
+            console.log("Error updating product quantity: " + transactionError.message);
+            reject(transactionError); // ส่งคืน error หากมี
           }
         );
       });

@@ -1,10 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity , Alert, Button} from 'react-native';
-import { getStock , deleteStock , updateStockAndProductQuantity ,updateStockQuantity} from '../../database/StockDatabase';
-import { insertProduct , getProductsByBarCode , updateProductQuantityByBarCode} from '../../database/database';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  Alert,
+  Button,
+} from 'react-native';
+import {
+  getStock,
+  deleteStock,
+  updateStockAndProductQuantity,
+  updateStockQuantity,
+} from '../../database/StockDatabase';
+import {
+  insertProduct,
+  getProductsByBarCode,
+  updateProductQuantityByBarCode,
+} from '../../database/database';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function WithdrawScreen({ navigation }) {
+export default function WithdrawScreen({navigation}) {
   const [stock, setStock] = useState([]);
 
   useEffect(() => {
@@ -13,7 +31,6 @@ export default function WithdrawScreen({ navigation }) {
     });
 
     loadStock();
-
 
     return unsubscribe;
   }, [navigation]);
@@ -27,14 +44,11 @@ export default function WithdrawScreen({ navigation }) {
     }
   };
 
-
-
-
-  const addProduct = async (item) => {
+  const addProduct = async item => {
     try {
       // ส่วนนี้จะตรวจสอบก่อนว่ามีสินค้าใน Products หรือยัง
       const productsWithBarCode = await getProductsByBarCode(item.BarCode);
-      
+
       if (productsWithBarCode.length > 0) {
         // สินค้ามีอยู่แล้ว อัปเดตจำนวน
         const newQuantity = productsWithBarCode[0].Quantity + item.Pack;
@@ -43,20 +57,29 @@ export default function WithdrawScreen({ navigation }) {
         // สินค้ายังไม่มี ให้ทำการเพิ่มสินค้าใหม่ใน Products
         //"INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
         //"INSERT INTO Stock (Name, ptID, PicturePath, Price, Quantity, BarCode, Pack) VALUES (?, ?, ?, ?, ?, ?, ?);",
-        await insertProduct(item.Name, '', item.ptID, '', '', item.Price*1.2, item.Pack, item.BarCode);
+        await insertProduct(
+          item.Name,
+          '',
+          item.ptID,
+          '',
+          '',
+          (item.Price * 1.2).toFixed(2),
+          item.Pack,
+          item.BarCode,
+        );
       }
-      
+
       // อัปเดตจำนวนใน Stock
       await updateStockQuantity(item.ID, item.Quantity - 1);
-      
-      Alert.alert("สำเร็จ", "สินค้าได้ถูกเพิ่มและจำนวนได้ถูกอัปเดต");
+
+      Alert.alert('สำเร็จ', 'สินค้าได้ถูกเพิ่มและจำนวนได้ถูกอัปเดต');
     } catch (error) {
       console.error('Failed to add product:', error);
-      Alert.alert("ผิดพลาด", "ไม่สามารถเพิ่มสินค้าได้: " + error.message);
+      Alert.alert('ผิดพลาด', 'ไม่สามารถเพิ่มสินค้าได้: ' + error.message);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     Alert.alert(
       'ลบข้อมูล',
       'คุณแน่ใจหรือว่าต้องการลบข้อมูลนี้?',
@@ -79,11 +102,10 @@ export default function WithdrawScreen({ navigation }) {
           },
         },
       ],
-      { cancelable: false },
+      {cancelable: false},
     );
   };
-  
-  
+
   const renderItem = ({item, navigation}) => (
     <View style={styles.productContainer}>
       <Image source={require('../../Image/water.jpg')} style={styles.image} />
@@ -92,24 +114,14 @@ export default function WithdrawScreen({ navigation }) {
         <Text style={styles.productText}>{item.Name}</Text>
         <Text style={styles.productText}>ราคา ฿ {item.Price}</Text>
         <Text style={styles.productText}>{item.BarCode}</Text>
-        
       </View>
       <View>
         <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
-        
-        <View style={styles.buttonContainer}>
-          <Button
-            title="เพิ่ม"
-            onPress={() => addProduct(item)}
-          />
-          <Button
-            title="ลบ"
-            onPress={() => handleDelete(item.ID)}
-          />
-        </View>
-        
-        
 
+        <View style={styles.buttonContainer}>
+          <Button title="เพิ่ม" onPress={() => addProduct(item)} />
+          <Button title="ลบ" onPress={() => handleDelete(item.ID)} />
+        </View>
       </View>
     </View>
   );
@@ -127,30 +139,30 @@ export default function WithdrawScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   productContainer: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     padding: 10,
     alignItems: 'center',
   },
   productTextContainer: {
-    flex: 1, 
-    marginLeft: 10, 
+    flex: 1,
+    marginLeft: 10,
   },
   productText: {
     color: 'black',
   },
   productImage: {
-    width: 50, 
+    width: 50,
     height: 50,
     resizeMode: 'cover',
   },
   image: {
-    width: 50, 
-    height: 50, 
-    resizeMode: 'contain', 
-  },
-  button:{
     width: 50,
-    height:50
+    height: 50,
+    resizeMode: 'contain',
+  },
+  button: {
+    width: 50,
+    height: 50,
   },
   buttonContainer: {
     flexDirection: 'row', // ให้ปุ่มเรียงแนวนอน

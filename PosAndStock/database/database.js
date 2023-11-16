@@ -210,38 +210,43 @@ export const updateProductQuantityByBarCode = async (barCode, quantity) => {
   });
 };
 
-export const createBillAndBillItems = async (productDetails, totalPrice) => {
+export const createBillAndBillItems = async (productDetails, totalPrice, currentDate) => {
   await initProductDB();
-  let billID;
   db.transaction(tx => {
+    // แยกวันที่และเวลาออกจาก currentDate
+    const dateTimeParts = currentDate.split('   TIME : ');
+    const datePart = dateTimeParts[0].split(' : ').join('-'); // แปลงเป็นรูปแบบ YYYY-MM-DD
+    const timePart = dateTimeParts[1];
+
     // สร้างบิลใหม่
     tx.executeSql(
-      "INSERT INTO Bills (TotalAmount, DateIssued, TimeIssued) VALUES (?, date('now'), time('now'));",
-      [totalPrice],
-      (_, results) => {
-        billID = results.insertId; // ได้ ID ของบิลที่สร้าง
-        console.log('Bill created successfully', billID);
+      "INSERT INTO Bills (TotalAmount, DateIssued, TimeIssued) VALUES (?, ?, ?);",
+      [totalPrice, datePart, timePart],
+      (tx, results) => {
+        const billID = results.insertId; // ได้ ID ของบิลที่สร้าง
+
+        // สร้างรายการสินค้าในบิล
+        Object.entries(productDetails).forEach(([barcode, detail]) => {
+          tx.executeSql(
+            'INSERT INTO BillItems (BillID, ProductBarcode, Quantity, Subtotal) VALUES (?, ?, ?, ?);',
+            [billID, barcode, detail.count, detail.Price * detail.count],
+            () => {
+              console.log('Bill item created successfully');
+            },
+            (tx, error) => {
+              console.log('Error creating bill item: ' + error.message);
+            },
+          );
+        });
       },
-      transactionError => {
-        console.log('Error creating bill: ' + transactionError.message);
+      (tx, error) => {
+        console.log('Error creating bill: ' + error.message);
       },
     );
-
-    // สร้างรายการสินค้าในบิล
-    Object.entries(productDetails).forEach(([barcode, detail]) => {
-      tx.executeSql(
-        'INSERT INTO BillItems (BillID, ProductBarcode, Quantity, Subtotal) VALUES (?, ?, ?, ?);',
-        [billID, barcode, detail.count, detail.Price * detail.count],
-        (_, results) => {
-          console.log('Bill item created successfully', results);
-        },
-        transactionError => {
-          console.log('Error creating bill item: ' + transactionError.message);
-        },
-      );
-    });
   });
 };
+
+
 
 export const decreaseProductQuantityByBarcode = async (barCode, quantity) => {
   await initProductDB();
@@ -265,48 +270,115 @@ export const decreaseProductQuantityByBarcode = async (barCode, quantity) => {
   });
 };
 
-
-
-export const getAllBillsWithDetails = async () => {
+export const fetchBillList = async () => {
   await initProductDB();
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT b.ID, b.TotalAmount, b.DateIssued, b.TimeIssued, bi.ProductBarcode, bi.Quantity, bi.Subtotal, p.Name, p.Price FROM Bills b ' +
-        'INNER JOIN BillItems bi ON b.ID = bi.BillID ' +
-        'INNER JOIN Products p ON bi.ProductBarcode = p.BarCode;',
+        'SELECT * FROM Bills;',
         [],
         (tx, results) => {
           let bills = [];
-          let len = results.rows.length;
-          for (let i = 0; i < len; i++) {
+          for (let i = 0; i < results.rows.length; i++) {
             let row = results.rows.item(i);
-            let billId = row.ID;
-            let bill = bills.find(b => b.ID === billId);
-
-            if (!bill) {
-              bill = {
-                ID: billId,
-                TotalAmount: row.TotalAmount,
-                DateIssued: row.DateIssued,
-                TimeIssued: row.TimeIssued,
-                Products: []
-              };
-              bills.push(bill);
-            }
-
-            bill.Products.push({
-              Barcode: row.ProductBarcode,
-              Name: row.Name,
-              Price: row.Price,
-              Quantity: row.Quantity,
-              Subtotal: row.Subtotal
+            bills.push({
+              ID: row.ID,
+              TotalAmount: row.TotalAmount,
+              DateIssued: row.DateIssued,
+              TimeIssued: row.TimeIssued,
             });
           }
-          resolve(bills); // ส่งคืน array ของบิลพร้อมรายละเอียดสินค้า
+          resolve(bills); // Return the array of bills
         },
         error => {
-          console.log('Error fetching bills with details: ' + error.message);
+          console.log('Error fetching bill list: ' + error.message);
+          reject(error);
+        },
+      );
+    });
+  });
+};
+
+export const fetchBillItems = async () => {
+  await initProductDB();
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM BillItems;',
+        [],
+        (tx, results) => {
+          let billItems = [];
+          for (let i = 0; i < results.rows.length; i++) {
+            let row = results.rows.item(i);
+            billItems.push({
+              ID: row.ID,
+              BillID: row.BillID,
+              ProductBarcode: row.ProductBarcode,
+              Quantity: row.Quantity,
+              Subtotal: row.Subtotal,
+            });
+          }
+          resolve(billItems); // Return the array of bill items
+        },
+        error => {
+          console.log('Error fetching bill items: ' + error.message);
+          reject(error);
+        },
+      );
+    });
+  });
+};
+
+export const fetchAllBillsWithDetails = async () => {
+  await initProductDB();
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      // ดึงข้อมูลบิล
+      tx.executeSql(
+        'SELECT * FROM Bills;',
+        [],
+        async (tx, results) => {
+          let bills = [];
+          for (let i = 0; i < results.rows.length; i++) {
+            let billRow = results.rows.item(i);
+            let bill = {
+              ID: billRow.ID,
+              TotalAmount: billRow.TotalAmount,
+              DateIssued: billRow.DateIssued,
+              TimeIssued: billRow.TimeIssued,
+              Items: []
+            };
+
+            // ดึงข้อมูลรายการในแต่ละบิล
+            await new Promise((itemResolve, itemReject) => {
+              tx.executeSql(
+                'SELECT * FROM BillItems WHERE BillID = ?;',
+                [bill.ID],
+                (tx, itemResults) => {
+                  for (let j = 0; j < itemResults.rows.length; j++) {
+                    let itemRow = itemResults.rows.item(j);
+                    bill.Items.push({
+                      ID: itemRow.ID,
+                      ProductBarcode: itemRow.ProductBarcode,
+                      Quantity: itemRow.Quantity,
+                      Subtotal: itemRow.Subtotal
+                    });
+                  }
+                  itemResolve();
+                },
+                error => {
+                  console.log('Error fetching items for bill: ' + error.message);
+                  itemReject(error);
+                }
+              );
+            });
+
+            bills.push(bill);
+          }
+          resolve(bills); // Return the array of bills with their items
+        },
+        error => {
+          console.log('Error fetching bills: ' + error.message);
           reject(error);
         }
       );

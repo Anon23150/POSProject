@@ -10,9 +10,11 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useState, useEffect} from 'react';
 import {storeData, getData, removeData} from '../../database/temporaryStoreage';
-import {getProductsByBarCode, decreaseProductQuantityByBarcode , createBillAndBillItems} from '../../database/database';
-import {Button} from 'react-native-elements';
-import {fonts} from 'react-native-elements/dist/config';
+import {
+  getProductsByBarCode,
+  decreaseProductQuantityByBarcode,
+  createBillAndBillItems,
+} from '../../database/database';
 
 const BillScreen = ({navigation}) => {
   const [currentDate, setCurrentDate] = useState('');
@@ -90,7 +92,7 @@ const BillScreen = ({navigation}) => {
         <Text>Scan product</Text>
       </TouchableOpacity>
       <View style={styles.infoContainer}>
-        <Text>ID : 12345</Text>
+        <Text>ID :</Text>
         <Text>Date : {currentDate}</Text>
       </View>
       <View style={styles.productContainer}>
@@ -128,8 +130,19 @@ const BillScreen = ({navigation}) => {
       <TouchableOpacity
         style={styles.checkoutButton}
         onPress={async () => {
+          // ตรวจสอบว่า currentDate ได้ถูกกำหนดค่าแล้ว
+          if (!currentDate) {
+            console.error('The current date is not set.');
+            return;
+          }
+
           // สร้างบิลและรายการบิล
-          await createBillAndBillItems(productDetails, totalPrice);
+          await createBillAndBillItems(productDetails, totalPrice, currentDate);
+
+          // คำสั่ง console.log สำหรับตรวจสอบข้อมูล
+          console.log(productDetails);
+          console.log(totalPrice);
+          console.log(currentDate);
 
           // ลดจำนวนสินค้าในสต็อก
           Object.entries(productDetails).forEach(async ([barcode, detail]) => {
@@ -140,6 +153,7 @@ const BillScreen = ({navigation}) => {
           setProductDetails({});
           setScannedBarcodes([]);
           setTotalPrice(0);
+
           // รีเซ็ตข้อมูลที่เก็บชั่วคราว
           await removeData('@scanned_barcodes');
         }}>

@@ -28,43 +28,7 @@ export default function WithdrawScreen({ navigation }) {
   };
 
 
-    const handleDelete = id => {
-    Alert.alert(
-      'ลบข้อมูล',
-      'คุณแน่ใจหรือว่าต้องการลบข้อมูลนี้?',
-      [
-        {
-          text: 'ยกเลิก',
-          onPress: () => console.log('Cancel Pressed'),
-          style: 'cancel',
-        },
-        {
-          text: 'ลบ',
-          onPress: async () => {
-            try {
-              await deleteStock (id);
-              setStock(products =>
-                products.filter(product => product.ID !== id),
-              );
-            } catch (error) {
-              console.error('Failed to delete the product', error);
-            }
-          },
-        },
-      ],
-      {cancelable: false},
-    );
-  };
 
-  const deleteItem = async (id) => {
-    try {
-      await deleteStock(id);
-      setStock(currentStock => currentStock.filter(item => item.ID !== id));
-      console.log('Item deleted successfully');
-    } catch (error) {
-      console.error('Failed to delete the item', error);
-    }
-  };
 
   const addProduct = async (item) => {
     try {
@@ -77,7 +41,9 @@ export default function WithdrawScreen({ navigation }) {
         await updateProductQuantityByBarCode(item.BarCode, newQuantity);
       } else {
         // สินค้ายังไม่มี ให้ทำการเพิ่มสินค้าใหม่ใน Products
-        await insertProduct(item.Name, '', '', '', '', item.Price, item.Pack, item.BarCode);
+        //"INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+        //"INSERT INTO Stock (Name, ptID, PicturePath, Price, Quantity, BarCode, Pack) VALUES (?, ?, ?, ?, ?, ?, ?);",
+        await insertProduct(item.Name, '', item.ptID, '', '', item.Price*1.2, item.Pack, item.BarCode);
       }
       
       // อัปเดตจำนวนใน Stock
@@ -89,6 +55,34 @@ export default function WithdrawScreen({ navigation }) {
       Alert.alert("ผิดพลาด", "ไม่สามารถเพิ่มสินค้าได้: " + error.message);
     }
   };
+
+  const handleDelete = async (id) => {
+    Alert.alert(
+      'ลบข้อมูล',
+      'คุณแน่ใจหรือว่าต้องการลบข้อมูลนี้?',
+      [
+        {
+          text: 'ยกเลิก',
+          style: 'cancel',
+        },
+        {
+          text: 'ลบ',
+          onPress: async () => {
+            try {
+              const result = await deleteStock(id);
+              console.log(result);
+              // After deleting, refresh the list to remove the item from UI
+              await loadStock();
+            } catch (error) {
+              console.error('Failed to delete the product', error);
+            }
+          },
+        },
+      ],
+      { cancelable: false },
+    );
+  };
+  
   
   const renderItem = ({item, navigation}) => (
     <View style={styles.productContainer}>
@@ -102,14 +96,17 @@ export default function WithdrawScreen({ navigation }) {
       </View>
       <View>
         <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
-        <Button
-          title="เพิ่ม"
-          onPress={() => addProduct(item)}
-        />
-        <Button style={styles.button}
-          onPress={handleDelete}
-          title="ลบ"
-        />
+        
+        <View style={styles.buttonContainer}>
+          <Button
+            title="เพิ่ม"
+            onPress={() => addProduct(item)}
+          />
+          <Button
+            title="ลบ"
+            onPress={() => handleDelete(item.ID)}
+          />
+        </View>
         
         
 
@@ -154,5 +151,9 @@ const styles = StyleSheet.create({
   button:{
     width: 50,
     height:50
+  },
+  buttonContainer: {
+    flexDirection: 'row', // ให้ปุ่มเรียงแนวนอน
+    justifyContent: 'flex-end', // จัดให้ปุ่มอยู่ทางด้านขวา
   },
 });

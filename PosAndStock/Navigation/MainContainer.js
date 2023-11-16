@@ -5,6 +5,7 @@ import  Ionicons from 'react-native-vector-icons/Ionicons';
 import { initProductDB } from '../database/database';
 import  { useEffect } from 'react';
 import { initStockDB ,insertStock} from '../database/StockDatabase';
+import { initBillDB } from '../database/Billdatabase';
 
 
 
@@ -16,7 +17,7 @@ import WithdrawScreen from './Screen/WithdrawScreen';
 import ReportScreen from './Screen/ReportScreen';
 import ScanQRScreen from './Screen/ScanQRScreen';
 import StockScreen from './Screen/StockScreen';
-
+import ScanStackNavigator from './Screen/ScanStack';
 
 //Set name Screen 
 const homeName = "Home";
@@ -38,6 +39,7 @@ export default function MainContainer() {
           try {
             await initProductDB();
             await initStockDB();
+            //await initBillDB()
           } catch (error) {
             console.error('Database setup failed', error);
           }
@@ -80,7 +82,7 @@ export default function MainContainer() {
             
                 <Tab.Screen name={homeName} component={HomeScreen} />
                 <Tab.Screen name={withdrawName} component={WithdrawScreen} />
-                <Tab.Screen name={scanQRName} component={ScanQRScreen} />
+                <Tab.Screen name={scanQRName} component={ScanStackNavigator}  />
                 <Tab.Screen name={reportName} component={ReportScreen} />
                 <Tab.Screen name={stockName} component={StockScreen} />
             </Tab.Navigator>

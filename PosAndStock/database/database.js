@@ -12,24 +12,33 @@ let db;
 
 export function initProductDB() {
   db = SQLite.openDatabase(
-    database_name,
-    database_version,
-    database_displayname,
-    database_size,
+    {
+      name: database_name,
+      version: database_version,
+      displayname: database_displayname,
+      size: database_size,
+    },
     () => {
       console.log("Database opened");
       db.transaction((tx) => {
         tx.executeSql(
           "CREATE TABLE IF NOT EXISTS Products " +
-          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, pmID TEXT, ptID TEXT, pcID TEXT, PicturePath TEXT, Price REAL, Quantity INTEGER , BarCode TEXT);",
-          [],
-          () => {
-            console.log("Table created successfully");
-          },
-          error => {
-            console.log("Error create table: " + error.message);
-          }
+          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Promotion TEXT, Type TEXT, pcID TEXT, PicturePath TEXT, Price REAL, Quantity INTEGER, BarCode TEXT);"
         );
+        tx.executeSql(
+          "CREATE TABLE IF NOT EXISTS Bills " +
+          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, TotalAmount REAL, DateIssued DATE, TimeIssued TIME);"
+        );
+        tx.executeSql(
+          "CREATE TABLE IF NOT EXISTS BillItems " +
+          "(ID INTEGER PRIMARY KEY AUTOINCREMENT, BillID INTEGER, ProductBarcode INTEGER, Quantity INTEGER, Subtotal REAL, " +
+          "FOREIGN KEY (BillID) REFERENCES Bills (ID), " +
+          "FOREIGN KEY (ProductBarcode) REFERENCES Products (BarCode));"
+        );
+      }, (error) => {
+        console.log("Error creating tables: " + error.message);
+      }, () => {
+        console.log("All tables created/verified successfully");
       });
     },
     error => {
@@ -38,15 +47,15 @@ export function initProductDB() {
   );
 }
 
-export const insertProduct = async (name, pmID, ptID, pcID, picturePath, price, quantity, BarCode) => {
+export const insertProduct = async (name, Promotion, Type, pcID, picturePath, price, quantity, BarCode) => {
   // ตรวจสอบว่าฐานข้อมูลเปิดอยู่
   await initProductDB();
 
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
-        [name, pmID, ptID, pcID, picturePath, price, quantity,BarCode],
+        "INSERT INTO Products (Name, Promotion, Type, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+        [name,  Promotion, Type, pcID, picturePath, price, quantity,BarCode],
         (_, results) => {
           console.log("Product inserted successfully", results);
           resolve(results);

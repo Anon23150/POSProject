@@ -81,15 +81,15 @@ export default function HomeScreen({navigation}) {
       {cancelable: false},
     );
   };
-
+// "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
   const renderProduct = ({item, navigation}) => (
     <View style={styles.productContainer}>
       <Image source={require('../../Image/water.jpg')} style={styles.image} />
-
       <View style={styles.productTextContainer}>
         <Text style={styles.productText}>{item.Name}</Text>
         <Text style={styles.productText}>ราคา ฿ {item.Price}</Text>
         <Text style={styles.productText}>{item.BarCode}</Text>
+        <Text style={styles.productText}>{item.ptID}</Text>
        
         
       </View>

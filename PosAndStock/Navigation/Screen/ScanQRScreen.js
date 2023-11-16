@@ -1,28 +1,73 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+import { storeData, getData } from '../../database/temporaryStoreage';
 
-export default function ScanScreen() {
-  const [barcode, setBarcode] = useState('');
+export default function ScanScreen({ navigation }) {
 
-  const handleBarCodeRead = e => {
-    setBarcode(e.data);
-    Alert.alert('Barcode Value', e.data, [{ text: 'OK', onPress: () => console.log('OK Pressed') }]);
+  const [isScanning, setIsScanning] = useState(false);
+  
+  
+  const handleBarCodeRead = async (e) => {
+    if (isScanning) {
+      return; // If already scanning, do nothing
+    }
+    setIsScanning(true); // Set scanning to true to prevent further scans
+  
+    // Add a delay before setting scanning to false again
+    setTimeout(() => {
+      setIsScanning(false); // After 2 seconds, allow scanning again
+    }, 2000); // Delay of 2 seconds
+  
+    // Show the alert to the user
+    Alert.alert('Barcode Value', e.data, [
+      { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+      { text: 'Add', onPress: () => addBarcodeToList(e.data) },
+    ]);
   };
+
+
+  const goToBillScreen = (barcodes) => {
+    navigation.navigate('Bill');
+  };
+  
+
+  const addBarcodeToList = async (barcode) => {
+    // Retrieve the current list of scanned barcodes from storage
+    const currentBarcodes = await getData('@scanned_barcodes') || [];
+    
+    // Add the new barcode to the list
+    const updatedBarcodes = [...currentBarcodes, barcode];
+  
+    // Save the updated list back to storage
+    await storeData('@scanned_barcodes', updatedBarcodes);
+  };
+
+
+  
+
+  
+
+  
+
+  
 
   return (
     <View style={styles.container}>
       <RNCamera
         style={styles.preview}
         onBarCodeRead={handleBarCodeRead}
-        flashMode={RNCamera.Constants.FlashMode.auto}
+        flashMode={RNCamera.Constants.FlashMode.off}
       >
-        {barcode !== '' && (
+        {/* {barcode !== '' && (
           <View style={styles.barcodeBox}>
             <Text style={styles.barcodeText}>{barcode}</Text>
           </View>
-        )}
+        )} */}
       </RNCamera>
+      <TouchableOpacity style={styles.fab} onPress={goToBillScreen}>
+        <Text style={styles.fabIcon}>Bill</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -51,4 +96,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'black',
   },
+  fab: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#FAB',
+    borderRadius: 30,
+    elevation: 8
+  },
+  fabIcon: {
+    fontSize: 18,
+    color: 'white',
+  }
 });
+
+
+
+

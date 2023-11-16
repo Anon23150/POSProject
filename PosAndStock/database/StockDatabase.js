@@ -159,7 +159,7 @@ export const updateStockAndProductQuantity = async (barCode, pack) => {
                   // โดยใช้ข้อมูลจากตาราง Stock เช่น Name, Price, PicturePath และ BarCode
                   tx.executeSql(
                     "INSERT INTO Products (Name, Price, PicturePath, Quantity, BarCode) VALUES (?, ?, ?, ?, ?);",
-                    [product.Name, product.Price, product.PicturePath, pack, barCode],
+                    [product.Name, product.Price*1.2, product.PicturePath, pack, barCode],
                     (_, insertResults) => {
                       console.log("New product inserted successfully", insertResults);
                     },

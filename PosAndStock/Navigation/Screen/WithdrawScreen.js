@@ -39,6 +39,10 @@ export default function WithdrawScreen({navigation}) {
     try {
       const stockData = await getStock();
       setStock(stockData);
+      console.log(
+        '-------------------------------------------------------------------------------------',
+      );
+      console.log(stockData);
     } catch (error) {
       console.error('Error loading stock:', error);
     }
@@ -55,14 +59,14 @@ export default function WithdrawScreen({navigation}) {
         await updateProductQuantityByBarCode(item.BarCode, newQuantity);
       } else {
         // สินค้ายังไม่มี ให้ทำการเพิ่มสินค้าใหม่ใน Products
+        //"INSERT INTO Stock    (Name, ptID, PicturePath, Price, Quantity, BarCode, Pack) VALUES (?, ?, ?, ?, ?, ?, ?);",
         //"INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
-        //"INSERT INTO Stock (Name, ptID, PicturePath, Price, Quantity, BarCode, Pack) VALUES (?, ?, ?, ?, ?, ?, ?);",
         await insertProduct(
           item.Name,
           '',
           item.ptID,
           '',
-          '',
+          item.PicturePath,
           (item.Price * 1.2).toFixed(2),
           item.Pack,
           item.BarCode,
@@ -108,7 +112,11 @@ export default function WithdrawScreen({navigation}) {
 
   const renderItem = ({item, navigation}) => (
     <View style={styles.productContainer}>
-      <Image source={require('../../Image/water.jpg')} style={styles.image} />
+      {item.PicturePath ? (
+        <Image source={{uri: item.PicturePath}} style={styles.image} />
+      ) : (
+        <Text style={styles.imagePlaceholder}>No Image</Text> // แสดงข้อความหากไม่มีภาพ
+      )}
 
       <View style={styles.productTextContainer}>
         <Text style={styles.productText}>{item.Name}</Text>
@@ -142,6 +150,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 10,
     alignItems: 'center',
+    margin: 10,
+    padding: 10,
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   productTextContainer: {
     flex: 1,
@@ -149,6 +168,7 @@ const styles = StyleSheet.create({
   },
   productText: {
     color: 'black',
+    fontSize: 17,
   },
   productImage: {
     width: 50,

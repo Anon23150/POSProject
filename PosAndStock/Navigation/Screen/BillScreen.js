@@ -30,7 +30,7 @@ const BillScreen = ({navigation}) => {
     const min = new Date().getMinutes();
 
     setCurrentDate(
-      date + ' : ' + month + ' : ' + year + '   TIME : ' + hours + ' : ' + min,
+      date + ' : ' + month + ' : ' + year + '   เวลา : ' + hours + ' : ' + min,
     );
 
     const fetchScannedBarcodes = async () => {
@@ -73,6 +73,10 @@ const BillScreen = ({navigation}) => {
     for (const [barcode, detail] of Object.entries(productDetails)) {
       newTotalPrice += detail.Price * detail.count;
     }
+    // console.log(
+    //   '******************************************************************',
+    // );
+    // console.log(productDetails);
     setTotalPrice(newTotalPrice);
   }, [productDetails]);
 
@@ -89,20 +93,24 @@ const BillScreen = ({navigation}) => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.scanButton} onPress={goToSanScreen}>
         <Ionicons name="camera-outline" size={24} color="black" />
-        <Text>Scan product</Text>
+        <Text>เพิ่มสินค้า</Text>
       </TouchableOpacity>
       <View style={styles.infoContainer}>
-        <Text>ID :</Text>
-        <Text>Date : {currentDate}</Text>
+        <Text>รหัสใบเสร็จ :</Text>
+        <Text>วันที่ : {currentDate}</Text>
       </View>
       <View style={styles.productContainer}>
         {Object.entries(productDetails).map(([barcode, detail], index) => (
           <View key={index} style={styles.productItem}>
             <View style={{flex: 1}}>
-              <Image
-                source={require('../../Image/water.jpg')}
-                style={styles.productImage}
-              />
+              {detail.PicturePath ? (
+                <Image
+                  source={{uri: detail.PicturePath}}
+                  style={styles.image}
+                />
+              ) : (
+                <Text style={styles.imagePlaceholder}>No Image</Text>
+              )}
             </View>
             <View style={{flex: 3, justifyContent: 'center'}}>
               <Text style={styles.productName}>{detail.Name}</Text>
@@ -158,12 +166,6 @@ const BillScreen = ({navigation}) => {
           await removeData('@scanned_barcodes');
         }}>
         <Text style={styles.checkoutButtonText}>ชำระเงิน</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.checkoutButton}
-        onPress={handleRemoveData}>
-        <Text style={styles.checkoutButtonText}>ลบข้อมูล</Text>
       </TouchableOpacity>
     </View>
   );
@@ -250,6 +252,10 @@ const styles = StyleSheet.create({
   },
   quantityButton: {
     // add styles for your quantity buttons as needed
+  },
+  image:{
+    width :50,
+    height:50,
   },
 });
 

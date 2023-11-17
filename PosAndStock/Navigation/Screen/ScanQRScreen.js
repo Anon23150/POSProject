@@ -18,13 +18,13 @@ export default function ScanScreen({navigation}) {
     }, 2000); // Delay of 2 seconds
 
     // Show the alert to the user
-    Alert.alert('Barcode Value', e.data, [
+    Alert.alert('รหัส Barcode', e.data, [
       {
-        text: 'Cancel',
+        text: 'ยกเลิก',
         onPress: () => console.log('Cancel Pressed'),
         style: 'cancel',
       },
-      {text: 'Add', onPress: () => addBarcodeToList(e.data)},
+      {text: 'เพิ่ม', onPress: () => addBarcodeToList(e.data)},
     ]);
   };
 
@@ -32,9 +32,6 @@ export default function ScanScreen({navigation}) {
     navigation.navigate('Bill');
   };
 
-  const goToBillListScreen = () => {
-    navigation.navigate('BillList');
-  };
 
   const addBarcodeToList = async barcode => {
     // Retrieve the current list of scanned barcodes from storage
@@ -54,10 +51,7 @@ export default function ScanScreen({navigation}) {
         onBarCodeRead={handleBarCodeRead}
         flashMode={RNCamera.Constants.FlashMode.off}></RNCamera>
       <TouchableOpacity style={styles.fab} onPress={goToBillScreen}>
-        <Text style={styles.fabIcon}>Bill</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.fabLeft} onPress={goToBillListScreen}>
-        <Text style={styles.fabIcon}>Bill List</Text>
+        <Text style={styles.fabIcon}>ใบเสร็จ</Text>
       </TouchableOpacity>
     </View>
   );

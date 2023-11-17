@@ -11,7 +11,6 @@ const ScanStackNavigator = () => {
     <ScanStack.Navigator>
       <ScanStack.Screen name="Scan" component={ScanScreen} />
       <ScanStack.Screen name="Bill" component={BillScreen} />
-      <ScanStack.Screen name="BillList" component={BillListScreen} /> 
     </ScanStack.Navigator>
   );
 };

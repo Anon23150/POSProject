@@ -67,7 +67,7 @@ export default function WithdrawScreen({navigation}) {
           item.ptID,
           '',
           item.PicturePath,
-          (item.Price * 1.2).toFixed(2),
+          (item.Price ).toFixed(2),
           item.Pack,
           item.BarCode,
         );

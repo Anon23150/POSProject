@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useState, useEffect} from 'react';
@@ -88,11 +89,11 @@ const BillScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.scanButton} onPress={goToSanScreen}>
-      <Image
-            style={styles.tinyLogo}
-            source={require('../../Icon/camera.png')}
-          />
-        <Text>  เพิ่มสินค้า</Text>
+        <Image
+          style={styles.tinyLogo}
+          source={require('../../Icon/camera.png')}
+        />
+        <Text> เพิ่มสินค้า</Text>
       </TouchableOpacity>
       <View style={styles.infoContainer}>
         <Text>รหัสใบเสร็จ :</Text>
@@ -137,6 +138,12 @@ const BillScreen = ({navigation}) => {
       <TouchableOpacity
         style={styles.checkoutButton}
         onPress={async () => {
+          if (Object.keys(productDetails).length === 0) {
+            console.log('No products to checkout');
+            Alert.alert("ไม่มีรายการสินค้า");
+            return;
+          }
+
           // ตรวจสอบว่า currentDate ได้ถูกกำหนดค่าแล้ว
           if (!currentDate) {
             console.error('The current date is not set.');
@@ -218,37 +225,19 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#ccc',
   },
-
-
-  // flexDirection: 'row',
-  //   padding: 10,
-  //   alignItems: 'center',
-  //   backgroundColor: '#f8f9fa',
-  //   borderWidth: 1,
-  //   borderColor: '#dee2e6',
-  //   borderRadius: 8,
-  //   shadowColor: '#000',
-  //   margin: 10,
-  //   padding: 10,
-  //   shadowOffset: {width: 0, height: 2},
-  //   shadowOpacity: 0.1,
-  //   shadowRadius: 4,
-  //   elevation: 2,
   checkoutButton: {
     backgroundColor: '#009900',
     padding: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    margin:10,
-    borderRadius:8,
+    margin: 10,
+    borderRadius: 8,
     shadowColor: '#000',
     margin: 10,
     shadowOffset: {width: 0, height: 6},
     shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 2,
-
-
   },
   checkoutButtonText: {
     color: '#fff',
@@ -263,24 +252,21 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 18,
-
-    // add other styles for product name as needed
+    marginLeft: 24,
   },
   productPrice: {
     fontSize: 18,
-    // add other styles for product price as needed
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    // add other styles for quantity controls as needed
   },
   quantityButton: {
     // add styles for your quantity buttons as needed
   },
-  image:{
-    width :50,
-    height:50,
+  image: {
+    width: 70,
+    height: 70,
   },
 });
 

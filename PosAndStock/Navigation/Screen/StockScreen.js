@@ -1,5 +1,13 @@
 import React, {useState} from 'react';
-import {View, Text, TextInput, Button, StyleSheet , Image} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import {insertStock} from '../../database/StockDatabase'; // ตรวจสอบว่าฟังก์ชันนี้ถูกสร้างและนำเข้ามาอย่างถูกต้อง
 import {RNCamera} from 'react-native-camera';
 import RNFS from 'react-native-fs';
@@ -40,12 +48,20 @@ export default function StockScreen({navigation}) {
         alert('ราคา, จำนวน และจำนวนสินค้าต่อแพ็คต้องเป็นตัวเลข');
         return;
       }
-  
+
       // ส่งข้อมูลไปยังฟังก์ชัน insertStock
-      await insertStock(name, ptID, imageUri, productPrice, productQuantity, barCode, productPack);
-  
+      await insertStock(
+        name,
+        ptID,
+        imageUri,
+        productPrice,
+        productQuantity,
+        barCode,
+        productPack,
+      );
+
       alert('เพิ่มสินค้าในคลังเสร็จสิ้น');
-  
+
       // รีเซ็ตข้อมูล
       setName('');
       setPtID('');
@@ -60,7 +76,7 @@ export default function StockScreen({navigation}) {
   };
 
   const handleSelectImage = () => {
-    ImagePicker.launchImageLibrary({ mediaType: 'photo' }, (response) => {
+    ImagePicker.launchImageLibrary({mediaType: 'photo'}, response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -72,14 +88,9 @@ export default function StockScreen({navigation}) {
       }
     });
   };
-  
-
-  
 
   return (
     <View style={styles.container}>
-      
-
       <TextInput
         style={styles.input}
         placeholder="ชื่อสินค้า"
@@ -88,7 +99,7 @@ export default function StockScreen({navigation}) {
       />
       <TextInput
         style={styles.input}
-        placeholder="ราคาทุน"
+        placeholder="ราคาที่ต้องการขาย"
         value={price}
         keyboardType="numeric"
         onChangeText={setPrice}
@@ -122,16 +133,21 @@ export default function StockScreen({navigation}) {
       />
       {!isScanning && (
         <View style={styles.buttonContainer}>
-          <Button title="สแกนบาร์โค้ดสินค้า" onPress={() => setIsScanning(true) } style={styles.button}/>
+          <TouchableOpacity
+            onPress={() => setIsScanning(true)}
+            style={styles.button}>
+            <Text style={styles.buttonText}>สแกนบาร์โค้ดสินค้า</Text>
+          </TouchableOpacity>
         </View>
       )}
 
-
-      <Button title="เลือกภาพ" onPress={handleSelectImage}
-        style={styles.button}
-      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={handleSelectImage} style={styles.button}>
+          <Text style={styles.buttonText}>เลือกภาพ</Text>
+        </TouchableOpacity>
+      </View>
       {imageUri !== '' && (
-        <Image source={{ uri: imageUri }} style={styles.image} />
+        <Image source={{uri: imageUri}} style={styles.image} />
       )}
 
       {isScanning && (
@@ -148,17 +164,24 @@ export default function StockScreen({navigation}) {
               buttonNegative: 'ไม่อนุญาต',
             }}
           />
-          <View style={styles.buttonContainer}>
-            <Button
-              title="หยุดแสกน"
-              onPress={() => setIsScanning(false)}
-            />
+          <View style={styles.button}>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={() => setIsScanning(false)}
+                style={styles.button}>
+                <Text style={styles.buttonText}>หยุดสแกน</Text>
+              </TouchableOpacity>
+            </View>
+
+            
           </View>
         </View>
       )}
 
       <View style={styles.buttonContainer}>
-        <Button title="เพิ่มสินค้า" onPress={handleInsert} style={styles.button} />
+        <TouchableOpacity onPress={handleInsert} style={styles.buttoninsert}>
+          <Text style={styles.buttonText}>เพิ่มสินค้า</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -192,7 +215,7 @@ const styles = StyleSheet.create({
 
   cameraContainer: {
     width: '50%',
-    height: '50%',
+    height: '40%',
   },
   preview: {
     width: '100%',
@@ -220,11 +243,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, // ระยะข้างในปุ่ม
     paddingVertical: 10, // ระยะข้างในปุ่ม
     margin: 5, // ระยะห่างจากปุ่มอื่น
-    minWidth: 100, // ขนาดขั้นต่ำของปุ่ม
-    alignItems: 'center' // จัดกลางข้อความ
-  }
-});
-
-const buttonStyle = StyleSheet.create({
-  
+    minWidth: 160, // ขนาดขั้นต่ำของปุ่ม
+    alignItems: 'center', // จัดกลางข้อความ
+    backgroundColor: '#0066cc',
+    maxHeight:100
+  },
+  buttonText: {
+    color: 'white', // สีข้อความ
+    fontWeight: 'bold', // ความหนาของข้อความ
+  },
+  buttoninsert: {
+    paddingHorizontal: 20, // ระยะข้างในปุ่ม
+    paddingVertical: 10, // ระยะข้างในปุ่ม
+    margin: 5, // ระยะห่างจากปุ่มอื่น
+    minWidth: 160, // ขนาดขั้นต่ำของปุ่ม
+    alignItems: 'center', // จัดกลางข้อความ
+    backgroundColor: 'green',
+    maxHeight:100
+  },
 });

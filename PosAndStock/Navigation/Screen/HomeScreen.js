@@ -9,12 +9,13 @@ import {
   Alert,
   Button,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// import Icon from 'react-native-vector-icons/EvilIcons';
 import {
   getProducts,
   deleteProduct,
   deleteAllProducts,
 } from '../../database/database';
+import {Icon} from '@rneui/base';
 
 export default function HomeScreen({navigation}) {
   const [products, setProducts] = useState([]);
@@ -88,17 +89,15 @@ export default function HomeScreen({navigation}) {
       )}
       <View style={styles.productTextContainer}>
         <Text style={styles.productText}>{item.Name}</Text>
-        <Text style={styles.productText}>ราคา ฿ {item.Price}</Text>
-        {/* <Text style={styles.productText}>{item.BarCode}</Text> */}
-        <Text style={styles.productText}>{item.ptID}</Text>
+        <Text style={{color:'red',fontSize:16}}>ราคา ฿ {item.Price}</Text>
+        <Text style={styles.productText}>{item.Type}</Text>
       </View>
-      <View>
+      <View style={styles.productActionContainer}>
         <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
-        <TouchableOpacity onPress={() => handleDelete(item.ID)}>
-          <MaterialCommunityIcons
-            name="trash-can-outline"
-            size={24}
-            color="black"
+        <TouchableOpacity onPress={() => handleDelete(item.ID)} style={{padding:10}}>
+          <Image
+            style={styles.tinyLogo}
+            source={require('../../Icon/cog-6-tooth.png')}
           />
         </TouchableOpacity>
       </View>
@@ -117,13 +116,11 @@ export default function HomeScreen({navigation}) {
   );
 }
 
-
-
 const styles = StyleSheet.create({
   productContainer: {
     flexDirection: 'row',
     padding: 10,
-    alignItems: 'center',
+    // alignItems: 'center',
     backgroundColor: '#f8f9fa',
     borderWidth: 1,
     borderColor: '#dee2e6',
@@ -144,14 +141,13 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 16,
   },
-  productImage: {
-    width: 50,
-    height: 50,
-    resizeMode: 'cover',
-  },
   image: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
     resizeMode: 'contain',
+  },
+  productActionContainer: {
+    alignItems: 'flex-end', // Align the icon and text to the right
+    justifyContent: 'center', // Center the content vertically
   },
 });

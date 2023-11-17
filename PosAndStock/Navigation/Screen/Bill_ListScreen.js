@@ -16,8 +16,6 @@ const BillListScreen = () => {
         const allBillItems = await fetchBillItems();
         const allProducts = await getProducts();
         console.log(allBillItems);
-
-        console.log('*********************************************');
         console.log(allProducts);
 
         // ผสานข้อมูลรายการในบิลกับข้อมูลบิล

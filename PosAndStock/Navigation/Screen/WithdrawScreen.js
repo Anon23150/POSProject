@@ -121,14 +121,25 @@ export default function WithdrawScreen({navigation}) {
       <View style={styles.productTextContainer}>
         <Text style={styles.productText}>{item.Name}</Text>
         <Text style={styles.productText}>ราคา ฿ {item.Price}</Text>
-        <Text style={styles.productText}>{item.BarCode}</Text>
+        <Text style={styles.productText}>{item.ptID}</Text>
       </View>
-      <View>
+      <View style={styles.productActionContainer}>
         <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
 
-        <View style={styles.buttonContainer}>
-          <Button title="เพิ่ม" onPress={() => addProduct(item)} />
-          <Button title="ลบ" onPress={() => handleDelete(item.ID)} />
+        <View style={{flexDirection:'row'}}>
+          <TouchableOpacity onPress={() => addProduct(item) } style={{padding:5,marginTop:5}}>
+            <Image
+              style={styles.tinyLogo}
+              source={require('../../Icon/plus-circle.png')}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity  onPress={() => handleDelete(item.ID)} style={{padding:5}}>
+            <Image
+              style={styles.tinyLogo}
+              source={require('../../Icon/trash.png')}
+            />
+          </TouchableOpacity>
+          
         </View>
       </View>
     </View>
@@ -145,13 +156,13 @@ export default function WithdrawScreen({navigation}) {
   );
 }
 
+
 const styles = StyleSheet.create({
   productContainer: {
     flexDirection: 'row',
     padding: 10,
-    alignItems: 'center',
+    //alignItems: 'center',
     margin: 10,
-    padding: 10,
     backgroundColor: '#f8f9fa',
     borderWidth: 1,
     borderColor: '#dee2e6',
@@ -168,24 +179,15 @@ const styles = StyleSheet.create({
   },
   productText: {
     color: 'black',
-    fontSize: 17,
-  },
-  productImage: {
-    width: 50,
-    height: 50,
-    resizeMode: 'cover',
+    fontSize: 16,
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
     resizeMode: 'contain',
   },
-  button: {
-    width: 50,
-    height: 50,
-  },
-  buttonContainer: {
-    flexDirection: 'row', // ให้ปุ่มเรียงแนวนอน
-    justifyContent: 'flex-end', // จัดให้ปุ่มอยู่ทางด้านขวา
+  productActionContainer: {
+    alignItems: 'flex-end', // Align the icon and text to the right
+    justifyContent: 'center', // Center the content vertically
   },
 });

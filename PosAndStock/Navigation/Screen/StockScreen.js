@@ -122,12 +122,14 @@ export default function StockScreen({navigation}) {
       />
       {!isScanning && (
         <View style={styles.buttonContainer}>
-          <Button title="สแกนบาร์โค้ดสินค้า" onPress={() => setIsScanning(true)} />
+          <Button title="สแกนบาร์โค้ดสินค้า" onPress={() => setIsScanning(true) } style={styles.button}/>
         </View>
       )}
 
 
-      <Button title="เลือกภาพ" onPress={handleSelectImage}/>
+      <Button title="เลือกภาพ" onPress={handleSelectImage}
+        style={styles.button}
+      />
       {imageUri !== '' && (
         <Image source={{ uri: imageUri }} style={styles.image} />
       )}
@@ -156,7 +158,7 @@ export default function StockScreen({navigation}) {
       )}
 
       <View style={styles.buttonContainer}>
-        <Button title="เพิ่มสินค้า" onPress={handleInsert} />
+        <Button title="เพิ่มสินค้า" onPress={handleInsert} style={styles.button} />
       </View>
     </View>
   );
@@ -214,4 +216,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  button: {
+    paddingHorizontal: 20, // ระยะข้างในปุ่ม
+    paddingVertical: 10, // ระยะข้างในปุ่ม
+    margin: 5, // ระยะห่างจากปุ่มอื่น
+    minWidth: 100, // ขนาดขั้นต่ำของปุ่ม
+    alignItems: 'center' // จัดกลางข้อความ
+  }
+});
+
+const buttonStyle = StyleSheet.create({
+  
 });

@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {fetchBillList, fetchBillItems} from '../../database/database';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ReportScreen = ({ navigation }) => {
   const [currentDate, setCurrentDate] = useState('');
@@ -11,6 +12,7 @@ const ReportScreen = ({ navigation }) => {
     const loadBillsAndCalculateTotal = async () => {
       try {
         const bills = await fetchBillList();
+        console.log(bills)
         // Calculate the total amount
         const total = bills.reduce(
           (acc, bill) => acc + Number(bill.TotalAmount),
@@ -25,6 +27,28 @@ const ReportScreen = ({ navigation }) => {
     loadBillsAndCalculateTotal();
     setCurrentDate(formatDate(new Date()));
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadBillsAndCalculateTotal = async () => {
+        try {
+          const bills = await fetchBillList();
+          console.log(bills)
+          // Calculate the total amount
+          const total = bills.reduce(
+            (acc, bill) => acc + Number(bill.TotalAmount),
+            0,
+          );
+          setTotalAmount(total);
+        } catch (error) {
+          console.error('Error fetching bills: ', error);
+        }
+      };
+      
+
+      loadBillsAndCalculateTotal();
+    }, [])
+  );
 
   const formatDate = date => {
     let day = date.getDate();
@@ -93,7 +117,9 @@ const styles = StyleSheet.create({
   secondaryText: {
     textAlign: 'center',
     fontWeight: 'bold',
-    fontSize:20,
+    fontSize:20
+    
+    ,
   },
   button: {
     backgroundColor: 'orange', // Use your color here

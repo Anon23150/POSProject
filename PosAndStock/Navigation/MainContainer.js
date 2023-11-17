@@ -6,6 +6,7 @@ import {initProductDB} from '../database/database';
 import {useEffect} from 'react';
 import {initStockDB, insertStock} from '../database/StockDatabase';
 import {initBillDB} from '../database/Billdatabase';
+import { Image } from 'react-native';
 
 //import screen
 import HomeScreen from './Screen/HomeScreen';
@@ -51,18 +52,18 @@ export default function MainContainer() {
             let rn = route.name;
 
             if (rn === homeName) {
-              iconName = focused ? 'home' : 'home-outline';
+              iconName = focused ? require('../Icon/home-1.png') : require('../Icon/home.png');
             } else if (rn === withdrawName) {
-              iconName = focused ? 'list' : 'list-outline';
-            } else if (rn === reportName) {
-              iconName = focused ? 'document' : 'document-outline';
-            } else if (rn === stockName) {
-              iconName = focused ? 'storefront-outline' : 'storefront-outline';
+              iconName = focused ? require('../Icon/folder-add-1.png') : require('../Icon/folder-add.png');
             } else if (rn === scanQRName) {
-              iconName = focused ? 'scan' : 'scan-outline';
-            }
+              iconName = focused ? require('../Icon/calculator-1.png') : require('../Icon/calculator.png');
+            } else if (rn === stockName) {
+              iconName = focused ? require('../Icon/archive-1.png') : require('../Icon/archive.png');
+            } else if (rn === reportName) {
+              iconName = focused ? require('../Icon/clipboard-document-list-1.png') : require('../Icon/clipboard-document-list.png');
+            }reportName
 
-            return <Ionicons name={iconName} size={size} color={color} />;
+            return <Image source={iconName} style={{ width: 20, height: 20 }} />;
           },
           tabBarActiveTintColor: 'tomato', // สีของไอคอนเมื่อเลือก
           tabBarInactiveTintColor: 'gray', // สีของไอคอนเมื่อไม่ได้เลือก
@@ -79,10 +80,14 @@ export default function MainContainer() {
             // Other options
           }}
         />
-        <Tab.Screen name={reportName} component={StackReport} options={{
+        <Tab.Screen
+          name={reportName}
+          component={StackReport}
+          options={{
             headerShown: false, // If you are rendering custom header in `ReportScreen`
             // Other options
-          }}/>
+          }}
+        />
         <Tab.Screen name={stockName} component={StockScreen} />
       </Tab.Navigator>
     </NavigationContainer>

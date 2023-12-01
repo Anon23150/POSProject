@@ -14,11 +14,21 @@ import {
   getProducts,
   deleteProduct,
   deleteAllProducts,
+  getProductsByBarCode,
+  updateProductQuantityByBarCode
 } from '../../database/database';
 import {Icon} from '@rneui/base';
 
+import {
+  getStock,
+  deleteStock,
+  updateStockAndProductQuantity,
+  updateStockQuantity,
+} from '../../database/StockDatabase';
+
 export default function HomeScreen({navigation}) {
   const [products, setProducts] = useState([]);
+  const [stock, setStock] = useState([]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -79,6 +89,107 @@ export default function HomeScreen({navigation}) {
       {cancelable: false},
     );
   };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadStock();
+    });
+
+    loadStock();
+
+    return unsubscribe;
+  }, [navigation]);
+
+  
+  const loadStock = async () => {
+    try {
+      const stockData = await getStock();
+      setStock(stockData);
+      console.log(
+        '--------------------------------stock --------------------------------------------------',
+      );
+      console.log(stockData);
+    } catch (error) {
+      console.error('Error loading stock:', error);
+    }
+  };
+
+
+
+
+  const addProduct = async item => {
+    try {
+      // ตรวจสอบว่ามีสินค้าใน Stock ด้วย Barcode นี้หรือยัง
+      console.log(item)
+      const stockItem = stock.find(stockItem => stockItem.BarCode == item.BarCode);
+      console.log(stockItem)
+
+      
+      if (stockItem) {
+        // ถ้ามีสินค้าใน Stock, ตรวจสอบว่ามีใน Products หรือยัง
+        const productsWithBarCode = await getProductsByBarCode(item.BarCode);
+  
+        if (item) {
+          // อัปเดตจำนวนใน Products
+          const newQuantity = productsWithBarCode[0].Quantity + stockItem.Pack;
+          await updateProductQuantityByBarCode(item.BarCode, newQuantity);
+        } else {
+          // เพิ่มสินค้าใหม่ใน Products
+          await insertProduct(
+            item.Name,
+            '',
+            item.ptID,
+            '',
+            item.PicturePath,
+            item.Price.toFixed(2),
+            stockItem.Pack,
+            item.BarCode
+          );
+        }
+  
+        // อัปเดตจำนวนใน Stock
+        const newStockQuantity = stockItem.Quantity - 1;
+        await updateStockQuantity(stockItem.ID, newStockQuantity);
+  
+        Alert.alert('สำเร็จ', 'สินค้าได้ถูกเพิ่มและจำนวนได้ถูกอัปเดต');
+      } else {
+        Alert.alert('ผิดพลาด', 'ไม่พบสินค้าใน Stock');
+      }
+    } catch (error) {
+      console.error('Failed to add product:', error);
+      Alert.alert('ผิดพลาด', 'ไม่สามารถเพิ่มสินค้าได้: ' + error.message);
+    }
+  };
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // "INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
   const renderProduct = ({item, navigation}) => (
     <View style={styles.productContainer}>
@@ -94,12 +205,23 @@ export default function HomeScreen({navigation}) {
       </View>
       <View style={styles.productActionContainer}>
         <Text style={styles.productText}>จำนวน : {item.Quantity}</Text>
+        
+        <View style = {{flexDirection:'row'}}>
+        <TouchableOpacity onPress={() => addProduct(item) } style={{padding:5,marginTop:5}}>
+            <Image
+              style={styles.tinyLogo}
+              source={require('../../Icon/plus-circle.png')}
+            />
+          </TouchableOpacity>
         <TouchableOpacity onPress={() => handleDelete(item.ID)} style={{padding:10}}>
           <Image
             style={styles.tinyLogo}
-            source={require('../../Icon/cog-6-tooth.png')}
+            source={require('../../Icon/Vector.png')}
           />
         </TouchableOpacity>
+
+        </View>
+
       </View>
     </View>
   );

@@ -90,6 +90,7 @@ export default function StockScreen({navigation}) {
   };
 
   return (
+    
     <View style={styles.container}>
       <TextInput
         style={styles.input}

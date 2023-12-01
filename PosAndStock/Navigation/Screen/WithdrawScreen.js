@@ -40,7 +40,7 @@ export default function WithdrawScreen({navigation}) {
       const stockData = await getStock();
       setStock(stockData);
       console.log(
-        '-------------------------------------------------------------------------------------',
+        '--------------------------------stock --------------------------------------------------',
       );
       console.log(stockData);
     } catch (error) {
@@ -50,31 +50,31 @@ export default function WithdrawScreen({navigation}) {
 
   const addProduct = async item => {
     try {
-      // ส่วนนี้จะตรวจสอบก่อนว่ามีสินค้าใน Products หรือยัง
-      const productsWithBarCode = await getProductsByBarCode(item.BarCode);
+      // // ส่วนนี้จะตรวจสอบก่อนว่ามีสินค้าใน Products หรือยัง
+      // const productsWithBarCode = await getProductsByBarCode(item.BarCode);
 
-      if (productsWithBarCode.length > 0) {
-        // สินค้ามีอยู่แล้ว อัปเดตจำนวน
-        const newQuantity = productsWithBarCode[0].Quantity + item.Pack;
-        await updateProductQuantityByBarCode(item.BarCode, newQuantity);
-      } else {
-        // สินค้ายังไม่มี ให้ทำการเพิ่มสินค้าใหม่ใน Products
-        //"INSERT INTO Stock    (Name, ptID, PicturePath, Price, Quantity, BarCode, Pack) VALUES (?, ?, ?, ?, ?, ?, ?);",
-        //"INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
-        await insertProduct(
-          item.Name,
-          '',
-          item.ptID,
-          '',
-          item.PicturePath,
-          (item.Price ).toFixed(2),
-          item.Pack,
-          item.BarCode,
-        );
-      }
+      // if (productsWithBarCode.length > 0) {
+      //   // สินค้ามีอยู่แล้ว อัปเดตจำนวน
+      //   const newQuantity = productsWithBarCode[0].Quantity + item.Pack;
+      //   await updateProductQuantityByBarCode(item.BarCode, newQuantity);
+      // } else {
+      //   // สินค้ายังไม่มี ให้ทำการเพิ่มสินค้าใหม่ใน Products
+      //   //"INSERT INTO Stock    (Name, ptID, PicturePath, Price, Quantity, BarCode, Pack) VALUES (?, ?, ?, ?, ?, ?, ?);",
+      //   //"INSERT INTO Products (Name, pmID, ptID, pcID, PicturePath, Price, Quantity,BarCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      //   await insertProduct(
+      //     item.Name,
+      //     '',
+      //     item.ptID,
+      //     '',
+      //     item.PicturePath,
+      //     (item.Price ).toFixed(2),
+      //     item.Pack,
+      //     item.BarCode,
+      //   );
+      // }
 
-      // อัปเดตจำนวนใน Stock
-      await updateStockQuantity(item.ID, item.Quantity - 1);
+      // // อัปเดตจำนวนใน Stock
+      await updateStockQuantity(item.ID, item.Quantity +1 );
 
       Alert.alert('สำเร็จ', 'สินค้าได้ถูกเพิ่มและจำนวนได้ถูกอัปเดต');
     } catch (error) {
@@ -82,6 +82,49 @@ export default function WithdrawScreen({navigation}) {
       Alert.alert('ผิดพลาด', 'ไม่สามารถเพิ่มสินค้าได้: ' + error.message);
     }
   };
+
+
+
+  const addProductatstart = async item => {
+    try {
+      // ตรวจสอบว่ามีสินค้าใน Products ด้วย Barcode นี้หรือยัง
+      const productsWithBarCode = await getProductsByBarCode(item.BarCode);
+
+      if (productsWithBarCode.length > 0) {
+        // ถ้าสินค้ามีอยู่แล้ว ไม่ต้องทำอะไร
+      } else {
+        // ถ้าสินค้ายังไม่มีในระบบ ให้ทำการเพิ่มสินค้าใหม่ใน Products
+        await insertProduct(
+          item.Name,
+          '', // pmID เป็นค่าว่างเพราะไม่ได้กำหนดในโค้ดของคุณ
+          item.ptID,
+          '', // pcID เป็นค่าว่างเช่นกัน
+          item.PicturePath,
+          (item.Price).toFixed(2), // ปัดเศษราคาเป็นทศนิยมสองตำแหน่ง
+          0, // ตั้งจำนวนเริ่มต้นเป็น 0
+          item.BarCode,
+        );
+      }
+
+      // ไม่ต้องอัปเดตจำนวนใน Stock เพราะจำนวนเริ่มต้นคือ 0
+      //Alert.alert('สำเร็จ', 'สินค้าได้ถูกเพิ่มในระบบ');
+    } catch (error) {
+      console.error('Failed to add product:', error);
+      //Alert.alert('ผิดพลาด', 'ไม่สามารถเพิ่มสินค้าได้: ' + error.message);
+    }
+};
+
+useEffect(() => {
+  // เช็คก่อนว่า array stock มีสมาชิกหรือไม่
+  if (stock && stock.length > 0) {
+    stock.forEach(item => {
+      addProductatstart(item);
+    });
+  }
+}, [stock]); // ใส่ stock เป็น dependency เพื่อให้ useEffect ทำงานเมื่อ stock มีการเปลี่ยนแปลง
+
+
+
 
   const handleDelete = async id => {
     Alert.alert(

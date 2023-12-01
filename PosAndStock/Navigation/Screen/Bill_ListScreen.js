@@ -60,22 +60,31 @@ const BillListScreen = () => {
             ยอดรวม: ฿{bill.TotalAmount.toFixed(2)}
           </Text>
           {bill.Items.map((item, idx) => (
-  <View key={idx} style={styles.itemContainer}>
-    <View style={styles.itemTextContainer}>
-      <Text style={styles.itemText}>ชื่อสินค้า: {item.ProductName}</Text>
-      <Text style={styles.itemText}>รหัส Barcode: {item.ProductBarcode}</Text>
-      <Text style={styles.itemText}>จำนวน: {item.Quantity}</Text>
-      <Text style={styles.itemText}>ราคา: ฿{item.Subtotal.toFixed(2)}</Text>
-    </View>
-    <View style={styles.imageContainer}>
-      {item.PicturePath ? (
-        <Image source={{uri: item.PicturePath}} style={styles.productImage} />
-      ) : (
-        <Text style={styles.noImageText}>ไม่มีภาพ</Text>
-      )}
-    </View>
-  </View>
-))}
+            <View key={idx} style={styles.itemContainer}>
+              <View style={styles.itemTextContainer}>
+                <Text style={styles.itemText}>
+                  ชื่อสินค้า: {item.ProductName}
+                </Text>
+                <Text style={styles.itemText}>
+                  รหัส Barcode: {item.ProductBarcode}
+                </Text>
+                <Text style={styles.itemText}>จำนวน: {item.Quantity}</Text>
+                <Text style={styles.itemText}>
+                  ราคา: ฿{item.Subtotal.toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.imageContainer}>
+                {item.PicturePath ? (
+                  <Image
+                    source={{uri: item.PicturePath}}
+                    style={styles.productImage}
+                  />
+                ) : (
+                  <Text style={styles.noImageText}>ไม่มีภาพ</Text>
+                )}
+              </View>
+            </View>
+          ))}
         </View>
       ))}
     </ScrollView>
@@ -125,9 +134,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 8,
   },
-  productImage:{
-    width:50,
-    height:50
+  productImage: {
+    width: 50,
+    height: 50,
   },
   noImageText: {
     fontSize: 14,
